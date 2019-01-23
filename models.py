@@ -1,6 +1,7 @@
 from app import db
 from bcrypt import gensalt, hashpw, checkpw
 from flask_marshmallow import Marshmallow
+from marshmallow import fields
 
 ma = Marshmallow()
 
@@ -22,7 +23,7 @@ class User(db.Model):
         return '<User {}>'.format(self.username)
 
     
-class UserSchema(ma.schema):
+class UserSchema(ma.Schema):
     id = fields.Integer()
     email = fields.String(required=True)
     password = fields.String(required=True)
