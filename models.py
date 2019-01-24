@@ -1,7 +1,8 @@
-from app import db
-from bcrypt import gensalt, hashpw, checkpw
 from flask_marshmallow import Marshmallow
 from marshmallow import fields
+from werkzeug.security import check_password_hash, generate_password_hash
+
+from app import db
 
 ma = Marshmallow()
 
@@ -11,12 +12,14 @@ class User(db.Model):
     password = db.Column(db.String(128), nullable=True)
     username = db.Column(db.String(20), nullable=False)
 
-    def hash_password(self, password):
-        self.password = hashpw(password, gensalt())
+    @staticmethod
+    def hash_password(password):
+        return generate_password_hash(password)
     
 
-    def check_password(self, password):
-        return checkpw(password, self.password)
+    @staticmethod
+    def check_password(password_hash, password):
+        return check_password_hash(password_hash, password)
     
     
     def __repr__(self):
