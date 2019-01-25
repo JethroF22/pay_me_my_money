@@ -10,13 +10,13 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(100), nullable=False, unique=True)
     password = db.Column(db.String(128), nullable=True)
-    username = db.Column(db.String(20), nullable=False)
+    username = db.Column(db.String(20), nullable=False, unique=True)
 
     @staticmethod
     def hash_password(password):
         return generate_password_hash(password)
     
-
+    
     @staticmethod
     def check_password(password_hash, password):
         return check_password_hash(password_hash, password)
