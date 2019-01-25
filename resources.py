@@ -2,6 +2,7 @@ from app import db
 from flask import request
 from flask_restful import Resource
 
+
 from models import User, UserSchema
 
 
@@ -18,7 +19,14 @@ class UserRegistration(Resource):
         data, errors = user_schema.load(json_data)
         if errors:
             return {'status': 'error', 'errors': errors}, 422
-        print('type: %s' % type(data['password']))
+
+        user = User.query.filter_by(username=data['username']).first()
+        if user:
+            return {'status': 'error', 'message':'Username already in use'}, 400
+
+        user = User.query.filter_by(email=data['email']).first()
+        if user:
+            return {'status': 'error', 'message':'Email already in use'}, 400
         
         user = User(
             username=data['username'],
@@ -31,3 +39,4 @@ class UserRegistration(Resource):
         result = user_schema.dump(user).data
 
         return {'status': 'success', 'data': result}, 200
+
