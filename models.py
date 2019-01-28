@@ -31,3 +31,18 @@ class UserSchema(ma.Schema):
     email = fields.String(required=True)
     password = fields.String(required=True)
     username = fields.String(required=True)
+
+
+class RevokedToken(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    jti = db.Column(db.String(120), nullable=False)
+
+    @classmethod
+    def is_token_blacklisted(cls, jti):
+        query = cls.query.filter_by(jti=jti).first()
+        return bool(query)
+
+
+class RevokedTokenSchema(ma.Schema):
+    id = fields.Integer()
+    jti = fields.String(required=True)
