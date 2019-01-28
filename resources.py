@@ -3,7 +3,6 @@ from flask import request
 from flask_restful import Resource
 from flask_jwt_extended import (
     create_access_token,
-    create_refresh_token,
     jwt_required,
     jwt_refresh_token_required,
     get_jwt_identity,
@@ -11,11 +10,18 @@ from flask_jwt_extended import (
 )
 
 
-from models import User, UserSchema
+from models import (
+    User,
+    UserSchema,
+    RevokedToken,
+    RevokedTokenSchema)
 
 
 users_schema = UserSchema(many=True)
 user_schema = UserSchema()
+
+tokens_schema = RevokedTokenSchema(many=True)
+token_schema = RevokedTokenSchema()
 
 class UserRegistration(Resource):
     def post(self):
@@ -70,10 +76,19 @@ class UserLogin(Resource):
         user = user_schema.dump(user).data
 
         access_token = create_access_token(identity=data['email'])
-        refresh_token = create_refresh_token(identity=data['email'])
 
         return {'status': 'success', 'data': {
             'username': user["username"],
             'email': user["email"]
-        }}, 200, {"Authorization": access_token, "RefreshToken": refresh_token}
+        }}, 200, {"Authorization": access_token}
+
+
+class LogoutAccessToken(Resource):
+    @jwt_required
+    def post(self):
+        jti = get_raw_jwt()['jti']
+        revoked_token = RevokedToken(jti=jti)
+        db.session.add(revoked_token)
+        db.session.commit()
+        return {'status': 'success', 'message': 'Access token revoked'}                
 
